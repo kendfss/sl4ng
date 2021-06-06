@@ -4,14 +4,14 @@ from functools import lru_cache, reduce
 from itertools import tee
 
 from .strings import alphabet
-from .types import regurge
+from .iteration import regenerator
+# from .types import regurge
 
 def shannonEntropy(iterable:Iterable[Any]) -> float:
     """
     Returns the Information, or Shannon, Entropy of an iterable
     """
-    consumable = regurge(iterable)
-    consumable = list(consumable)
+    consumable = regenerator(iterable)
     weights = {j: freq(j, iterable)/len(consumable) for j in set(consumable)}
     return -sigma([val*log(val, 2) for val in weights.values()])
 
@@ -26,7 +26,7 @@ def entropy(iterable:Iterable[Any], base:int=2, mode:str='kbdUS', space:str=None
     digits = ''.join(i for i in abc if i.isnumeric() or i=='.' or i=='-')
     prob = lambda x,y: freq(x, y)/len(y)
     
-    consumable = regurge(iterable)
+    consumable = regenerator(iterable)
     
     iterates = hasattr(consumable,'__iter__')
 
@@ -60,8 +60,7 @@ def probability(item:Any, iterable:Iterable) -> float:
     Returns the quotient of the frequency with which an item
     occurs in an iterable by the length of said iterable
     """
-    consumable = regurge(iterable)
-    consumable = list(consumable)
+    consumable = regenerator(iterable)
     return freq(item, consumable) / len(consumable)
 
 
@@ -73,8 +72,7 @@ def freq(element:Any, iterable:Iterable[Any], overlap:bool=False) -> int:
             say you're looking for 00 and there's a "000"
             you may only get one of what could be two matches
     """
-    consumable = regurge(iterable)
-    consumable = list(consumable)
+    consumable = regenerator(iterable)
     if type(element)==type(consumable)==str:
         if not overlap:
             return len(consumable.split(element))-1
@@ -87,8 +85,7 @@ def expectation(iterable:Iterable[complex]) -> complex:
     """
     Returns the expectation value of a collection
     """
-    consumable = regurge(iterable)
-    consumable = list(consumable)
+    consumable = regenerator(iterable)
     exVal = 0
     for i in consumable:
         exVal += (i*(freq(i, consumable))/len(consumable))
@@ -99,8 +96,7 @@ def mean(iterable:Iterable[complex]) -> complex:
     """
     Returns the mean value of a collection
     """
-    consumable = regurge(iterable)
-    consumable = list(consumable)
+    consumable = regenerator(iterable)
     meanVal = sum(consumable)
     meanVal /= len(consumable)
     return meanVal
@@ -111,8 +107,8 @@ def median(iterable:Iterable[complex]) -> complex:
     Returns the median value of a collection
     Will avoid consuming a generator/map/filter
     """
-    consumable = regurge(iterable)
-    consumable = sorted(consumable)
+    # consumable = regurge(iterable)
+    consumable = regenerator(sorted(iterable))
     if len(consumable)%2:
         index = round((len(consumable)-1)/2)
         middle = consumable[index]
@@ -127,8 +123,7 @@ def midpoint(iterable:Iterable[complex]) -> complex:
     Returns the midpoint of a collection
     Will avoid consuming a generator/map/filter
     """
-    consumable = regurge(iterable)
-    consumable = sorted(consumable)
+    consumable = regenerator(iterable)
     return sum(max(consumable), min(consumable))/2
 
 
@@ -137,8 +132,7 @@ def central_deviation(iterable:Iterable[complex]) -> complex:
     Returns the difference between an iterable's midpoint and its median
     Will avoid consuming a generator/map/filter
     """
-    consumable = regurge(iterable)
-    consumable = (consumable)
+    consumable = regenerator(iterable)
     return abs(median(consumable) - midpoint(consumable))
 
 
@@ -146,8 +140,7 @@ def geomean(iterable:Iterable[complex]) -> complex:
     """
     Returns the geometric mean of a collection
     """
-    consumable = regurge(iterable)
-    consumable = list(consumable)
+    consumable = regenerator(iterable)
     geoMean = (sigma(iterable))**(1/len(iterable))
     return geoMean
 
@@ -156,8 +149,7 @@ def harmean(iterable:Iterable[complex]) -> complex:
     """
     Returns the harmonic mean of a collection
     """
-    consumable = regurge(iterable)
-    consumable = list(consumable)
+    consumable = regenerator(iterable)
     assert 0 not in [i for i in consumable], "Input contains a zero, try a different one."
     reciprocals = [1/i for i in consumable]
     return len(consumable)/sigma(reciprocals)
@@ -167,8 +159,7 @@ def popdev(iterable:Iterable[complex]) -> complex:
     """
     Returns the population standard deviation of a collection
     """
-    consumable = regurge(iterable)
-    consumable = list(consumable)
+    consumable = regenerator(iterable)
     avg = mean(consumable)
     v1 = [(i-avg)**2 for i in consumable]
     v2 = ((reduce(lambda x, y: x+y, v1))/len(v1))**(1/2)
@@ -179,8 +170,7 @@ def samdev(iterable:Iterable[complex]) -> complex:
     """
     Returns the sample standard deviation of a collection
     """
-    consumable = regurge(iterable)
-    consumable = list(consumable)
+    consumable = regenerator(iterable)
     avg = mean(consumable)
     v1 = [(i-avg)**2 for i in consumable]
     v2 = ((sigma(v1))/(len(v1)-1))**(1/2)
@@ -191,8 +181,7 @@ def popvar(iterable:Iterable[complex]) -> complex:
     """
     Returns the population variance for a collection
     """
-    consumable = regurge(iterable)
-    consumable = list(consumable)
+    consumable = regenerator(iterable)
     avg = mean(consumable)
     deviations = [(i-avg)**2 for i in consumable]
     pv = sum(deviations)/len(deviations)
@@ -203,8 +192,7 @@ def samvar(iterable:Iterable[complex]) -> complex:
     """
     Returns the sample variance for a collection
     """
-    consumable = regurge(iterable)
-    consumable = list(consumable)
+    consumable = regenerator(iterable)
     avg = mean(consumable)
     v2 = [(i-v1)**2 for i in consumable]
     v3 = sigma(v2)/len(v2)

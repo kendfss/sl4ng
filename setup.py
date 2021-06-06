@@ -3,13 +3,15 @@ from setuptools import setup, find_packages
 with open('README.md', 'r') as fob:
     long_description = fob.read()
 
+with open('requirements.txt', 'r') as fob:
+    requirements = fob.readlines()
+
 setup(
     name='sl4ng',
-    version='0.0.1',
-    author='Kenneth Elisandro',
-    author_email='eli2and40@tilde.club',
-    url='https://tildegit.org/eli2and40/sl4ng',
-    # packages=find_packages(),
+    version='0.0.2',
+    author='Kenneth Sabalo',
+    author_email='kennethsantanasabalo@tilde.club',
+    url='https://github.com/kendfss/sl4ng',
     packages=['sl4ng'],
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -20,15 +22,6 @@ setup(
     long_description_content_type='text/markdown',
     keywords='utilities productivity',
     license='MIT',
-    requires=[
-        'pyperclip',
-        'dill',
-        'psutil',
-        'send2trash',
-        'tqdm',
-        'filetype',
-    ],
-    # py_modules=['sl4ng'],
-    python_requires='>=3.8',
-
+    requires=requirements,
+    python_requires='>3.9',
 )

@@ -1,15 +1,18 @@
-from typing import Iterable, Any
+from typing import Iterable, Any, Generator, Callable, Iterator
 from itertools import chain
 import string, random
 
 import pyperclip
 
-from .types import generator, regurge
+from .iteration import regenerator
+# from .types import function
+from .debug import tipo
+
 
 def join(iterable:Iterable[Any]=None, sep:str='', head:str='', tail:str='') -> str:
     """
     Cast elements of an array to string and concatenate them.
-    This will consume a generator
+    This will consume a Generator
     Examples:
         >>> m3ta.show(
                 map(
@@ -34,7 +37,7 @@ def join(iterable:Iterable[Any]=None, sep:str='', head:str='', tail:str='') -> s
         [0, 1, 2]
         [0, 1, 2, 3]
     """
-    if iterable:
+    if not isinstance(iterable, type(None)):
         return head + sep.join(map(str, iterable)) + tail
     else:
         def wrapper(iterable:Iterable[Any]):
@@ -42,7 +45,7 @@ def join(iterable:Iterable[Any]=None, sep:str='', head:str='', tail:str='') -> s
             return head + sep.join(iterable) + tail
         return wrapper
 
-def ascii(omissions:str='', include:bool=False) -> str:
+def ascii(omissions:str='w', include:bool=False) -> str:
     """
     Return the ascii character base excluding the given omissions:
         "p" ->  ' ' + punctuation
@@ -58,8 +61,9 @@ def ascii(omissions:str='', include:bool=False) -> str:
         "u":string.ascii_uppercase,
         "l":string.ascii_lowercase,
         "d":string.digits,
+        "w":string.whitespace,
     }
-    return "".join(d[k] for k in d if k in omissions) if include else "".join(d[k] for k in d if not k in omissions)
+    return "".join(d[key] for key in d if key in omissions) if include else "".join(d[key] for key in d if not key in omissions)
 
 
 asciis = kbd = abc = ascii
@@ -106,28 +110,34 @@ def monoalphabetic(message:str, shift:int, alphabet:str=kbd(), space:str=None) -
 
 caesar = monoalphabetic
 
-def multisplit(splitters:Iterable[str], target:str=None) -> generator:
-    """
-    Split a string by a the elements of an iterable
-    >>> splitter = multisplit('word1 word2 word3'.split())
-    >>> map(splitter, texts)
-        - OR -
-    >>> [*multisplit('breakfast', 'green eggs and ham')]
-    ['g', 'n ', 'gg', ' ', 'nd h', 'm']
-        - OR -
-    >>> [*multisplit('breakfast'.split(), 'green eggs and ham')]
-    ['green eggs and ham']
-    
-    """
-    def wrapper(target):
-        nonlocal splitters
-        splitters = iter(splitters)
-        result = target.split(next(splitters))
-        for splitter in splitters:
-            result = [*chain.from_iterable(i.split(splitter) for i in result)]
-        yield from filter(None, result)
-    return wrapper(target) if target else wrapper
 
+def splitall(splitters:Iterable[str], target:str) -> regenerator:
+    """
+    >>> [*splitall('-_.', 'author-file_name.ext')] == 'author file name ext'.split()
+    True
+    """
+    splitters = iter(splitters)
+    result = target.split(next(splitters))
+    for splitter in splitters:
+        result = [*chain.from_iterable(i.split(splitter) for i in result)]
+    yield from filter(None, result)
+class splitter:
+    """
+    Callable which splits a string by a the elements of an iterable. Ignore any empty strings.
+    >>> [*splitter('-_.')('author-file_name.ext')] == 'author file name ext'.split()
+    True
+    """
+    def __init__(self, splitters:Iterable[str]):
+        self.splitters = regenerator(splitters)
+    def __call__(self, argument) -> regenerator:
+        return splitall(self.splitters, argument)
+    def __repr__(self):
+        return f"{tipo(self)}{tuple(self.splitters)}"
+def multisplit(splitters:Iterable[str], target:str=None) -> (Callable, regenerator):
+    """
+    Wrapper on sl4ng.strings.splitall and sl4ng.strings.splitter
+    """
+    return splitall(splitters, target) if not isinstance(target, type(None)) else splitter(splitters)
 
 def memespace(string:str, spaces:int=1, keep_spaces:bool=False, copy:bool=False):
     """
@@ -172,18 +182,36 @@ def sinusize(string:str, copy:bool=False):
     """
     mat = [[] for i in range(3)]
     for i, j in enumerate(string):
-        if not i%2:
-            mat[1].append(j)
+        if not i % 2:
             mat[0].append(' ')
+            mat[1].append(j)
             mat[2].append(' ')
-        elif not (i%4) - 1:
+        elif not (i % 4) - 1:
             mat[0].append(j)
             mat[1].append(' ')
             mat[2].append(' ')
         else:
-            mat[2].append(j)
             mat[0].append(' ')
             mat[1].append(' ')
+            mat[2].append(j)
     out = join([join(line) for line in mat], '\n')
     pyperclip.copy(out) if copy else None
+    return out
+
+def clean_url(url, root=True, protocol='http'):
+    """
+    Remove trailing/leading slashes from a url
+    params
+        root
+            if the url starts at the domain level
+        protocol
+            ignored if root=False
+            what protocol should be added to the start of a url
+    """
+    out = '/'.join(filter(None, url.split('/')))
+    if root:
+        if ':/' in out:
+            out = out.replace(':/', '://')
+        else:
+            out = '://'.join((protocol, out))
     return out

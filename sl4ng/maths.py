@@ -3,78 +3,72 @@
 from functools import lru_cache, reduce
 from itertools import chain, combinations, count
 from math import pi, ceil
-from typing import Iterable
+from typing import Iterable, Generator
+from numbers import Number, Real, Complex, Integral
 
-from .types import generator
+# from .types import regenerator
+from .iteration import flat, regenerator
 
-def pyramid(length:int, shift:int=0) -> float:
+def sign(number:Real) -> str:
+    return '-+'[number >= 0]
+
+def pyramid(length:Integral, shift:Integral=0) -> Real:
     """
     Returns the product of dividing 1 by each intger in the range(2+shift,2+int(length)+shift) (aka - the number of poops in your pocket)
     if the length is not an integer it will be converted to one
-    Dependencies: N/A
-    In: length, shift=0 (integers)
-    Out: N/A
     """
     val = 1
-    for i in range(2+shift, 2+int(length)+shift):
+    for i in range(2 + shift, 2 + int(length) + shift):
         val /= i
     return val
 
 
-def primes1(n:int) -> list:
-    """Generates a list of the first n primes. A cast will be used if the input is not an integer
-    Dependencies: N/A
-    In: (number)
-    Out: list"""
-    # pwimes = list(x for x in range(n) if x > 1 and all(x%y for y in range(2, min(x, 11))))
+def first_primes(n:Integral) -> list:
+    """
+    Generates a list of the first n primes. A cast will be used if the input is not an integer
+    """
     n = int(n) - 1
     bank = []
     track = 2
-    while len(bank)<n+1:
-        if all(track%y for y in range(2, min(track,11))):
+    while len(bank)< n + 1:
+        if all(track % y for y in range(2, min(track, 11))):
             bank.append(track)
         track += 1
     return sorted(set(bank))
 
 
-def primes2(n:int) -> list:
-    """Generates a list of primes with value lower than the input integer
-    Dependencies: N/A
-    In: (integer)
-    Out: list"""
-    pwimes = list({x for x in range(n) if x > 1 and all(x%y for y in range(2, min(x, 11)))})
-    return list(pwimes)
+def primeslt(n:Integral) -> Generator:
+    """
+    Generates a list of primes with value lower than the input integer
+    """
+    return (x for x in range(n) if x > 1 and all(x % y for y in range(2, min(x, 11))))
+primes_lower_than = primeslt
+
+def succ(n:Integral) -> Integral:
+    """
+    Returns the successor of the input number
+    """
+    return n + 1
 
 
-def succ(n:int) -> int:
-    """Returns the successor of the input number
-    Dependencies: N/A
-    In: (number)
-    Out: number"""
-    return n+1
+def pred(n:Integral) -> Integral:
+    """
+    Returns the predecessor of the input number
+    """
+    return n - 1
 
 
-def pred(n:int) -> int:
-    """Returns the predecessor of the input number
-    Dependencies: N/A
-    In: (number)
-    Out: number"""
-    return n-1
+def rt(x:Integral, n:Complex=2) -> Complex:
+    """
+    Returns the n-th root of the input number, x
+    """
+    return x ** (1 / n)
 
 
-def rt(x:int, n:complex) -> complex:
-    """Returns the nth root of the input number, x
-    Dependencies: N/A
-    In: (x, n)
-    Out: float(number)"""
-    return x**(1/n)
-
-
-def gcd0(a:int, b:int) -> int:
-    """The famous euclidean algorithm for computing the greatest common divisor of a pair of numbers a and b
-    Dependencies: N/A
-    In: (a: first number, b: second number)
-    Out: int"""
+def gcd0(a:Integral, b:Integral) -> Integral:
+    """
+    The famous euclidean algorithm for computing the greatest common divisor of a pair of numbers a and b
+    """
     while a != b:
         if a > b:
             a -= b
@@ -83,30 +77,24 @@ def gcd0(a:int, b:int) -> int:
     return a
 
     
-def gcd(*args:[int, tuple]) -> int:
+def gcd(*args:[int, tuple]) -> Integral:
     """
     Compute the gcd for more than two integers at a time. Returns input if only one argument is given and it is greater than zero
-    Dependencies: itertools.combinations
-    In: subscriptable
-    Out: int
     """
-    if any(i<=0 for i in args):
+    if any(i <= 0 for i in args):
         return None
-    if len(args)>1:
-        gcds = {d for pair in combinations(args, 2) if all(i%(d:=gcd0(*pair))==0 for i in args)}
-        return max(gcds)
-    elif sum(args)>0:
-        return args[0]
+    if len(args) > 1:
+        gcds = {d for pair in combinations(args, 2) if all(i % (d := gcd0(*pair)) == 0 for i in args)}
+        return max(gcds) if gcds else 1
+    elif sum(args) > 0:
+        return max(args)
 
 
-def eratosthenes(n:int, imaginarypart:bool=False) -> generator:
+def eratosthenes(n:Integral, imaginarypart:bool=False) -> Generator:
     """
-    Implements eratothenes' sieve as a generator. 
+    Implements eratothenes' sieve as a Generator. 
         If the input is not an int it will be rounded to one. 
         Imaginary-part-based rounding optionable
-    Dependencies: None
-    In: int
-    Out: generator
     """
     iscomp = isinstance(n, complex) or issubclass(type(n), complex)
     n = round(n.imag) if imaginarypart and iscomp else round(n.real) if iscomp else round(n)
@@ -115,18 +103,15 @@ def eratosthenes(n:int, imaginarypart:bool=False) -> generator:
     primes = set()
     for i in rack:
         if i not in marked:
-            multiples = {j for j in rack if j%i==0 and j>i}
+            multiples = {j for j in rack if j % i == 0 and j > i}
             marked.update(multiples)
             yield i
 
 
-def factors0(n:int) -> generator:
-    '''
+def _factors(n:Integral) -> Generator:
+    """
     Compute the factors of an integer
-    Dependencies: itertools.(chain, combinations)
-    In: int, or sequence of ints
-    Out: generator
-    '''
+    """
     pipe = lambda array: reduce(lambda x, y: x*y, array, 1)
     primes = tuple(eratosthenes(n))
     facts = {n, 1} if n!= 0 else {}
@@ -145,34 +130,26 @@ def factors0(n:int) -> generator:
         yield from facts   
 
 
-def factors(*args:[int, tuple]) -> generator:
-    '''
+def factors(*args:[int, tuple]) -> Generator:
+    """
     Compute the common factors of any finite number of integers
-    Dependencies: m3ta.factors0
-    In: int, or sequence of ints
-    Out: generator
-    '''
-    if len(args) == 1 and hasattr(args[0], '__iter__'):
-        args = tuple(args[0])
+    """
+    args = regenerator(flat(args))
     if all(isinstance(i, int) or i==int(i) for i in args):
-        # facs = []
+        yielded = set()
         for i in args:
-            for j in factors0(i):
-                # facs.append(j)
-                if all(not arg%j for arg in args):
-                    yield j
-        # for i in facs:
-            # if freq(i, facs)==len(args):
-                # yield i
+            if not i in yielded:
+                for j in _factors(i):
+                    if not j in yielded:
+                        yielded.add(j)
+                        if all(not arg%j for arg in args):
+                            yield j
 
 
 @lru_cache(maxsize = 500)
-def factorial(n:int) -> int:
+def factorial(n:Integral) -> Integral:
     """
     Return n! for any integer
-    Dependencies: lru_cache(from functools)
-    In: (int)
-    Out: int
     """
     if n>=0:
         k = 1
@@ -184,124 +161,133 @@ def factorial(n:int) -> int:
         return -factorial(abs(n))
 
 
-def binomial(n:int, k:int) -> int:
-    '''Returns the n choose k for any k in range(n)
-    Dependencies: factorial
-    In: (integer)
-    Out: float'''
-    return round(factorial(n)/(factorial(n-k)*factorial(k)))
+def binomial(n:Integral, k:Integral) -> Integral:
+    """
+    Returns the n choose k for any k in range(n)
+    """
+    return int(factorial(n)/(factorial(n-k)*factorial(k)))
 
 
-def isHarmoDiv(n:int) -> bool:
-    """Computes a boolean whose value corresponds to the statement 'the number n is a Harmonic Divisor Number'
-    Dependencies: harmean (from meta)
-    In: Number
-    Out: Boolean"""
+def options(iterable:Iterable) -> Integral:
+    """
+    Returns the number of ways to choose elements from the given iterable
+    This will consume a Generator
+    """
+    consumable = regenerator(iterable)
+    length = sum(1 for i in consumable)
+    return sum(binomial(length, i) for i in range(length))
+
+
+def isHarmoDiv(n:Integral) -> bool:
+    """
+    Computes a boolean whose value corresponds to the statement 'the number n is a Harmonic Divisor Number'
+    """
     facts = factors(n)
     return int(harmean(facts)) == harmean(facts)
 
 
-def isFactor(divisor:int, predicate:int) -> bool:
-    """Determines if a Number is a multiple of a Divisor
-    Dependencies: N/A
-    In: (Divisor, Number)
-    Out: Boolean"""
-    return predicate % divisor == 0
+def isfactor(divisor:Integral, divisee:Integral) -> bool:
+    """
+    Determines if a Number is a multiple of a Divisor
+    """
+    return divisee % divisor == 0
 
 
-def isprime(n:int) -> bool:
-    """Determines if a Number is a multiple of a Divisor
-    Dependencies: N/A
-    In: (Divisor, Number)
-    Out: Boolean"""
-    return n in eratosthenes(n+1)
+def isprime(n:Integral) -> bool:
+    """
+    Confirm that an integer has no factors other than 1 and itself
+    """
+    if n < 2:
+        return False
+    tried = []
+    for i in range(2, int(n/2)+1):
+        if any(not i%j for j in tried):
+            continue
+        else:
+            tried.append(i) if i > 1 else None
+            if not n%i:
+                return False
+    return True
 
 
-def isPerfect(n:int) -> bool:
-    """Returns a Boolean evaluation of an integer's Arithmetic Perfection
-    Dependencies: sigma, factors (both from meta)
-    In: Integer
-    Out: Boolean"""
+def isperfect(n:Integral) -> bool:
+    """
+    Check if an integer is equal to the sum of its factors
+    """
     return n == sum(factors(n))
 
 
-def isAbundant(n:int) -> bool:
-    """Returns a Boolean evaluation of an integer's Arithmetic Abundance
-    Dependencies: sigma, factors (both from meta)
-    In: Integer
-    Out: Boolean"""
+def isabundant(n:Integral) -> bool:
+    """
+    Check if an integer is greater than the sum of its factors
+    """
     return n > sigma(factors(n))
 
 
-def isDeficient(n:int) -> bool:
-    """Returns a Boolean evaluation of an integer's Arithmetic Deficience
-    Dependencies: sigma, factors (both from meta)
-    In: Integer
-    Out: Boolean"""
+def isdeficient(n:Integral) -> bool:
+    """
+    Check if an integer is smaller than the sum of its factors
+    """
     return n < sigma(factors(n))
 
 
-def isFilial(n:int) -> bool:
-    fctrs = factors(n)
-    lace = [int(i) for i in str(n)]
-    return sigma(lace) in fctrs
+def isfilial(n:Integral) -> bool:
+    """
+    Check if an integer is divisible by the sum of its digits
+    """
+    return not n % sum(eval(i) for i in str(n))
 
 
-def mulPer(n:int) -> int:
-    """Computes the Multiplicative Persistence of an int or float in base-10 positional notation
-    Dependencies: pipe (from meta)
-    In: Integer
-    Out: Integer"""
+def mulper(n:Integral) -> Integral:
+    """
+    Computes the Multiplicative Persistence of an int or float in base-10 positional notation
+    If the number is a float the decimal will be removed
+    """
     # Exclusions
     if len(str(n)) == 1:
         return 0
     elif (str(0) in str(n)) or ((len(str(n)) == 2) and (str(1) in str(n))):
         return 1
     else:
-        cache = []
+        ctr = 0
         while len(str(n)) > 1:
-            digitList = [int(i) for i in "".join(str(n).split('.'))]
-            n = pipe(digitList)
-            cache.append(n)
-        return len(cache)
+            # digitList = [int(i) for i in "".join(str(n).split('.'))]
+            digitList = map(int, str(i).replace('.', ''))
+            n = reduce(lambda x, y: x*y, digitList, 1)
+            ctr += 1
+        return ctr
 
 
-def addPer(n:int) -> int:
-    """Computes the Additive Persistence of an int or float in base-10 positional notation
-    Dependencies: sigma (from meta)
-    In: Integer
-    Out: Integer"""
+def addper(n:Integral) -> Integral:
+    """
+    Computes the Additive Persistence of an int or float in base-10 positional notation
+    """
     if len(str(n)) == 1:
         return 0
     elif len(str(n)) < 1:
         return ValueError("Your number of choice has less than one digit")
     else:
-        cache = []
+        ctr = 0
         while len(str(n)) > 1:
             digitList = [int(i) for i in "".join(str(n).split('.'))]
-            n = sigma(digitList)
-            cache.append(n)
-        return len(cache)
+            n = sum(digitList)
+            ctr += 1
+        return ctr
 
 
-def triangular(a:int, b:int) -> int:
-    """Returns the triangular number of an interval [a,b]
-    dependencies: none
-    In: integers a and b
-    Out: integer"""
+def triangular(a:Integral, b:Integral) -> Integral:
+    """
+    Returns the triangular number of an interval [a,b]
+    """
     interval = [i for i in range(b) if i > a]
     for num in interval:
         a += num
     return a+b
 
 
-def rationability(v:complex) -> complex:
+def rationability(v:Complex) -> Complex:
     """
     Get the subtractive series of the digits of a float, or that of an integer's reciprocal, measured from its math.ceil value
-    Dependencies: math.ceil
-    In: int/float
-    Out: float
-    
     rationability(math.pi)
         0.8584073464102069
     rationability(3)
@@ -315,7 +301,7 @@ def rationability(v:complex) -> complex:
     return n
 
 
-def root(value:complex, power:complex=2) -> complex:
+def root(value:Complex, power:Complex=2) -> Complex:
     """
     Get the root of a number
     
@@ -327,7 +313,7 @@ def root(value:complex, power:complex=2) -> complex:
     return value**(1/power)
 
 
-def odds(n:int=-1) -> generator:
+def odds(n:Integral=-1) -> Generator:
     """
     Yield the first n odd numbers, use a negative value for all of them
     """
@@ -338,7 +324,7 @@ def odds(n:int=-1) -> generator:
             yield m
             n -= 1
 
-def evens(n:int=-1) -> generator:
+def evens(n:Integral=-1) -> Generator:
     """
     Yield the first n even numbers, use a negative value for all of them
     """
@@ -349,14 +335,14 @@ def evens(n:int=-1) -> generator:
             yield m
             n -= 1
 
-def congrues(n:int, modulus:int=6, cls:int=1) -> bool:
+def congrues(n:Integral, modulus:Integral=6, cls:Integral=1) -> bool:
     """
     Check if n is equal to +-cls modulo modulus
     """
     return n % modulus in {cls, modulus-cls}
 
 
-def mulseq(root:int, base:int=2, terms:int=-1, start:int=0, step:int=1) -> generator:
+def mulseq(root:Integral, base:Integral=2, terms:Integral=-1, start:Integral=0, step:Integral=1) -> Generator:
     """
     Generate a sequence of multiples of a root and a base. By default it will yield the doubles sequence of the root.
     """

@@ -1,30 +1,36 @@
-from typing import Any, Iterable
+from typing import Any, Iterable, Generator, Callable
 import sys, winsound, os, time, inspect
 
 import pyperclip
 
-from .types import SineWave, generator, regurge, function
-
-
 separator = " ".join(70*'-')
 spaceprint = lambda x: print(x, "\n{}".format(separator))
 
-main = '__name__ == "__main__"'
-    
+mainame = main = '__name__ == "__main__"'
 
-def tipo(inpt:Any=type(lambda:0), keep_module:bool=False) -> str:
+def nome(inpt):
+    """
+    Towards a tool that can get the name of a variable
+    """
+    for k, v in locals().items():
+        if v == inpt:
+            return k
+
+def tipo(inpt, keep_module:bool=True) -> str:
     """
     Return the name of an object's type
-    Dependencies: None
-    In: object
-    Out: str
+    params:
+        keep_module
+            If set to False, the name of the class will be returned without any explicit reference to package nesting
     """
+    if isinstance(inpt, type):
+        inpt = str(inpt)
     if keep_module:
         return str(type(inpt)).split("'")[1]
     return str(type(inpt)).split("'")[1].split('.')[-1]
 
 
-def beeper(inpt:int) -> SineWave:
+def beeper(inpt:int):
     """Produces a series of beeps of increasing frequency
     Dependencies: Beep(a function from the winsound module)
     In: (number of beeps desired)
@@ -90,6 +96,7 @@ def modir(module:type(os), copy:bool=True) -> str:
 def printer(iterable:Iterable, indent:int=0) -> None:
     """
     Prints each element of an iterable on a new line, features an optional indent argument
+    ultimately replaced by "show"
     """
     assert isinstance(indent, int), "Indentation level must be a positive integer"
     for i in iterable:
@@ -137,33 +144,26 @@ def aspectRatio(x:int, y:int, w:int=None, h:int=None) -> float:
     return w/h==x/y if w and h else (w, (w*(y/x))) if w else ((h*(x/y)), h) if h else x/y
 
 
-def show(iterable:Iterable[Any], indentation:int=0, enum:bool=False, first:int=1, indentor:str='\t', tail=True, head=False, file=sys.stdout, sep:str='') -> None: 
+def show(iterable:Iterable[Any], indentation:int=0, enum:bool=False, first:int=1, indentor:str='\t', tail=True, head=True, file=sys.stdout, sep:str='') -> Generator: 
     """
-    Print each element of an array.
+    Print each element of an iterable.
     >>> show(zip('abc','123'))
     ('a', '1')
     ('b', '2')
     ('c', '3')
-
-
-    >>>
     """
-    # consumable = regurge(iterable)
-    consumable = iter(regurge(iterable))
     if (wasstr:=isinstance(file, str)):
         file = open(file)
     print('\n', file=file) if head else None
-    for i, j in enumerate(consumable, first):
+    for i, j in enumerate(iterable, first):
         print(
             (
-                f"{indentation*indentor}{j}",
-                f"{indentation*indentor}{i}\t{j}"
+                f"{indentation * indentor}{j}",
+                f"{indentation * indentor}{i}\t{j}"
             )[enum],
             sep=sep,
             file=file
         )
-        # if sep:
-            # print(sep)
     print('\n', file=file) if tail else None
     if wasstr:
         file.close()
@@ -221,8 +221,9 @@ def getsource(obj:Any, *args, copy:bool=False, **kwargs) -> str:
     """
     text = inspect.getsource(obj).splitlines()
     if copy:
-        pyperclip.copy('\n'.join(text))
-        return
+        text = '\n'.join(text)
+        pyperclip.copy(text)
+        return text
     show(text, *args, **kwargs)
 
 
