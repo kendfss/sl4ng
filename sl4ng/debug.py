@@ -1,3 +1,4 @@
+# __all__ = "mainame nome tipo beeper syspath padd modir printer tryimport aspectRatio show pop hasDocs getsource".split()
 from typing import Any, Iterable, Generator, Callable
 import sys, winsound, os, time, inspect
 
@@ -223,7 +224,6 @@ def getsource(obj:Any, *args, copy:bool=False, **kwargs) -> str:
     if copy:
         text = '\n'.join(text)
         pyperclip.copy(text)
-        return text
     show(text, *args, **kwargs)
 
 
