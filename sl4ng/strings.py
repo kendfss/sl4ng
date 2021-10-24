@@ -5,18 +5,21 @@ import string, random
 import pyperclip
 
 from .iteration import regenerator
+
 # from .types import function
 from .debug import tipo
 
 
-def join(iterable:Iterable[Any]=None, sep:str='', head:str='', tail:str='') -> str:
+def join(
+    iterable: Iterable[Any] = None, sep: str = '', head: str = '', tail: str = ''
+) -> str:
     """
     Cast elements of an array to string and concatenate them.
     This will consume a Generator
     Examples:
         >>> m3ta.show(
                 map(
-                    join, 
+                    join,
                     (range(i) for i in range(1,5))
                 )
             )
@@ -24,11 +27,11 @@ def join(iterable:Iterable[Any]=None, sep:str='', head:str='', tail:str='') -> s
         01
         012
         0123
-        
+
         # Also works as a closure using keyword arguments
         >>> m3ta.show(
             map(
-                join(sep=', ',head='[',tail=']'), 
+                join(sep=', ',head='[',tail=']'),
                 (range(i) for i in range(1,5))
             )
         )
@@ -40,12 +43,15 @@ def join(iterable:Iterable[Any]=None, sep:str='', head:str='', tail:str='') -> s
     if not isinstance(iterable, type(None)):
         return head + sep.join(map(str, iterable)) + tail
     else:
-        def wrapper(iterable:Iterable[Any]):
+
+        def wrapper(iterable: Iterable[Any]):
             iterable = map(str, iterable)
             return head + sep.join(iterable) + tail
+
         return wrapper
 
-def ascii(omissions:str='w', include:bool=False) -> str:
+
+def ascii(omissions: str = 'w', include: bool = False) -> str:
     """
     Return the ascii character base excluding the given omissions:
         "p" ->  ' ' + punctuation
@@ -57,40 +63,59 @@ def ascii(omissions:str='w', include:bool=False) -> str:
             0123456789
     """
     d = {
-        "p":" "+string.punctuation,
-        "u":string.ascii_uppercase,
-        "l":string.ascii_lowercase,
-        "d":string.digits,
-        "w":string.whitespace,
+        "p": " " + string.punctuation,
+        "u": string.ascii_uppercase,
+        "l": string.ascii_lowercase,
+        "d": string.digits,
+        "w": string.whitespace,
     }
-    return "".join(d[key] for key in d if key in omissions) if include else "".join(d[key] for key in d if not key in omissions)
+    return (
+        "".join(d[key] for key in d if key in omissions)
+        if include
+        else "".join(d[key] for key in d if not key in omissions)
+    )
 
 
 asciis = kbd = abc = ascii
 alphabet = kbd()
 
 
-def emptyString(line:str) -> bool:
+def emptyString(line: str) -> bool:
     """
     Determine if a string is empty ('', ' ','\n','\t') or not
     """
-    return any(line==i for i in '* *\n*\t'.split('*'))
+    return any(line == i for i in '* *\n*\t'.split('*'))
 
 
-def rewrite(string:str, charmap:dict={'A':'T', 'T':'A', 'C':'G', 'G':'C', 'a':'t', 't':'a', 'c':'g', 'g':'c'}, sep:str='') -> str:
+def rewrite(
+    string: str,
+    charmap: dict = {
+        'A': 'T',
+        'T': 'A',
+        'C': 'G',
+        'G': 'C',
+        'a': 't',
+        't': 'a',
+        'c': 'g',
+        'g': 'c',
+    },
+    sep: str = '',
+) -> str:
     """
     Given a sequence derived from 'ATCG', this function returns the complimentary base pairs of the given dna sequence
     Dependencies: None
-	Arguments: permutation from 'ATCG'
+        Arguments: permutation from 'ATCG'
     Out: compliment of input
     """
     return sep.join([charmap[string[i]] for i in range(len(string))])
 
 
-def monoalphabetic(message:str, shift:int, alphabet:str=kbd(), space:str=None) -> str:
+def monoalphabetic(
+    message: str, shift: int, alphabet: str = kbd(), space: str = None
+) -> str:
     """
     A simple implementation of the monoalphabetic cipher.
-    By convention, use a: 
+    By convention, use a:
         Positive integer shift if you want to encode
         Negative integer if you want to decode
     """
@@ -108,10 +133,11 @@ def monoalphabetic(message:str, shift:int, alphabet:str=kbd(), space:str=None) -
         space = ' '
     return space.join(words)
 
+
 caesar = monoalphabetic
 
 
-def splitall(splitters:Iterable[str], target:str) -> regenerator:
+def splitall(splitters: Iterable[str], target: str) -> regenerator:
     """
     >>> [*splitall('-_.', 'author-file_name.ext')] == 'author file name ext'.split()
     True
@@ -121,25 +147,39 @@ def splitall(splitters:Iterable[str], target:str) -> regenerator:
     for splitter in splitters:
         result = [*chain.from_iterable(i.split(splitter) for i in result)]
     yield from filter(None, result)
+
+
 class splitter:
     """
     Callable which splits a string by a the elements of an iterable. Ignore any empty strings.
     >>> [*splitter('-_.')('author-file_name.ext')] == 'author file name ext'.split()
     True
     """
-    def __init__(self, splitters:Iterable[str]):
+
+    def __init__(self, splitters: Iterable[str]):
         self.splitters = regenerator(splitters)
+
     def __call__(self, argument) -> regenerator:
         return splitall(self.splitters, argument)
+
     def __repr__(self):
         return f"{tipo(self)}{tuple(self.splitters)}"
-def multisplit(splitters:Iterable[str], target:str=None) -> (Callable, regenerator):
+
+
+def multisplit(splitters: Iterable[str], target: str = None) -> (Callable, regenerator):
     """
     Wrapper on sl4ng.strings.splitall and sl4ng.strings.splitter
     """
-    return splitall(splitters, target) if not isinstance(target, type(None)) else splitter(splitters)
+    return (
+        splitall(splitters, target)
+        if not isinstance(target, type(None))
+        else splitter(splitters)
+    )
 
-def memespace(string:str, spaces:int=1, keep_spaces:bool=False, copy:bool=False):
+
+def memespace(
+    string: str, spaces: int = 1, keep_spaces: bool = False, copy: bool = False
+):
     """
     Aestheicize a string
     eg:
@@ -154,11 +194,12 @@ def memespace(string:str, spaces:int=1, keep_spaces:bool=False, copy:bool=False)
     out = ''
     for i, j in enumerate(string, 1):
         out += j
-        out += ' '*spaces if i<len(string) else ''
+        out += ' ' * spaces if i < len(string) else ''
     pyperclip.copy(out) if copy else None
     return out
 
-def memecase(string, copy:bool=False):
+
+def memecase(string, copy: bool = False):
     """
     Randomize the case of text in strings
     >>> memecase('something about narwhals, bacon, and midnight')
@@ -171,7 +212,7 @@ def memecase(string, copy:bool=False):
     return out
 
 
-def sinusize(string:str, copy:bool=False):
+def sinusize(string: str, copy: bool = False):
     """
     Map the characters of a string to critical and solvent points of a sinusoid
     eg
@@ -197,6 +238,7 @@ def sinusize(string:str, copy:bool=False):
     out = join([join(line) for line in mat], '\n')
     pyperclip.copy(out) if copy else None
     return out
+
 
 def clean_url(url, root=True, protocol='http'):
     """

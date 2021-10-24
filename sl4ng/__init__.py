@@ -11,11 +11,8 @@ from .web import *
 from .magnitudes import *
 
 
-
-
 HERE, THIS = os.path.split(__file__)
 
-    
 
 if __name__ == "__main__":
     pass

@@ -1,13 +1,23 @@
 # __all__ = "mainame nome tipo beeper syspath padd modir printer tryimport aspectRatio show pop hasDocs getsource".split()
 from typing import Any, Iterable, Generator, Callable
-import sys, winsound, os, time, inspect
+
+# import sys, winsound, os, time, inspect
+import sys, os, time, inspect
 
 import pyperclip
 
-separator = " ".join(70*'-')
+
+class dummy:
+    __getattr__ = lambda *a, **k: None
+
+
+winsound = dummy()
+# winsound.__getattr__ = lambda *a, **k: None
+separator = " ".join(70 * '-')
 spaceprint = lambda x: print(x, "\n{}".format(separator))
 
 mainame = main = '__name__ == "__main__"'
+
 
 def nome(inpt):
     """
@@ -17,7 +27,8 @@ def nome(inpt):
         if v == inpt:
             return k
 
-def tipo(inpt, keep_module:bool=True) -> str:
+
+def tipo(inpt, keep_module: bool = True) -> str:
     """
     Return the name of an object's type
     params:
@@ -31,13 +42,13 @@ def tipo(inpt, keep_module:bool=True) -> str:
     return str(type(inpt)).split("'")[1].split('.')[-1]
 
 
-def beeper(inpt:int):
+def beeper(inpt: int):
     """Produces a series of beeps of increasing frequency
     Dependencies: Beep(a function from the winsound module)
     In: (number of beeps desired)
     Out: Series of beeps of increasing frequency"""
     for i in range(inpt):
-        frequency = 65*2**(i)
+        frequency = 65 * 2 ** (i)
         duration = 500
         winsound.Beep(frequency, duration)
 
@@ -56,36 +67,39 @@ def padd(inpt):
     In: (desired address)
     Out: N/A"""
     sys.path.append(inpt)
-    return("done :)\n{0}".format(sys.path))
+    return "done :)\n{0}".format(sys.path)
 
 
-def test(func:type(lambda:1), unsortedlist:tuple) -> float:
+def test(func: type(lambda: 1), unsortedlist: tuple) -> float:
     """Test measures the amount of time needed to run a function on a given Input
     dependencies: time.clock() (perf_counter due to deprecation )
     In: function, input
     Out: Difference in time between the call and return of the function
     lifted from davejm's sorting module on github"""
-    #Set copy equal to a new copy (different mem. location) of unsortedList to preserve current list
-    #using the [:] split command which returns a copy of the whole list but as a new object
+    # Set copy equal to a new copy (different mem. location) of unsortedList to preserve current list
+    # using the [:] split command which returns a copy of the whole list but as a new object
     from time import perf_counter as clock
+
     copy = unsortedlist[:]
-    start = clock() #Set start time. TODO - May convert to using timit module.
-    func(copy) #Run bubble or shuttle sort with copy of unsorted list as argument
-    duration  = clock() - start #Work out how long the execution of algorithm took and set to duration
+    start = clock()  # Set start time. TODO - May convert to using timit module.
+    func(copy)  # Run bubble or shuttle sort with copy of unsorted list as argument
+    duration = (
+        clock() - start
+    )  # Work out how long the execution of algorithm took and set to duration
     return duration
 
 
-def modir(module:type(os), copy:bool=True) -> str:
+def modir(module: type(os), copy: bool = True) -> str:
     """
     Returns the full path of the directory inwhich a given module is located
     Dependencies: os, pyperclip
     In: module object, boolean (t-copy,f-not copy)
     Out: String or Boolean
-    
+
     Example:
         import matplotlib.pyplot as plt
         print(modir(plt),modir(plt,False),sep='\n')
-    
+
         Prints
             None
             E:\Languages\Python37-64\Lib\site-packages\matplotlib
@@ -94,17 +108,23 @@ def modir(module:type(os), copy:bool=True) -> str:
     return pth if not copy else pyperclip.copy(pth)
 
 
-def printer(iterable:Iterable, indent:int=0) -> None:
+def printer(iterable: Iterable, indent: int = 0) -> None:
     """
     Prints each element of an iterable on a new line, features an optional indent argument
     ultimately replaced by "show"
     """
     assert isinstance(indent, int), "Indentation level must be a positive integer"
     for i in iterable:
-        print(indent*"\t"+f"{i}")
+        print(indent * "\t" + f"{i}")
 
 
-def tryimport(name:str, pack:str=None, substitute:bool=False, subpack:str=None, silent:bool=False) -> Any:
+def tryimport(
+    name: str,
+    pack: str = None,
+    substitute: bool = False,
+    subpack: str = None,
+    silent: bool = False,
+) -> Any:
     """
     Import a package, or something from within it, failing its installation import an optional substitute.
     Example:
@@ -126,12 +146,12 @@ def tryimport(name:str, pack:str=None, substitute:bool=False, subpack:str=None, 
                 return tryimport(substitute)
         elif subpack:
             return tryimport(subpack)
-        else: 
-            if not silent: 
+        else:
+            if not silent:
                 raise ModuleNotFoundError
 
 
-def aspectRatio(x:int, y:int, w:int=None, h:int=None) -> float:
+def aspectRatio(x: int, y: int, w: int = None, h: int = None) -> float:
     """
     Compute aspect ratio and scale to desired size
     aspectRatio(a, b) ~> a/b
@@ -142,10 +162,28 @@ def aspectRatio(x:int, y:int, w:int=None, h:int=None) -> float:
     In: x, y, w, h: numbers
     Outs: int or tuple
     """
-    return w/h==x/y if w and h else (w, (w*(y/x))) if w else ((h*(x/y)), h) if h else x/y
+    return (
+        w / h == x / y
+        if w and h
+        else (w, (w * (y / x)))
+        if w
+        else ((h * (x / y)), h)
+        if h
+        else x / y
+    )
 
 
-def show(iterable:Iterable[Any], indentation:int=0, enum:bool=False, first:int=1, indentor:str='\t', tail=True, head=True, file=sys.stdout, sep:str='') -> Generator: 
+def show(
+    iterable: Iterable[Any],
+    indentation: int = 0,
+    enum: bool = False,
+    first: int = 1,
+    indentor: str = '\t',
+    tail=True,
+    head=True,
+    file=sys.stdout,
+    sep: str = '',
+) -> Generator:
     """
     Print each element of an iterable.
     >>> show(zip('abc','123'))
@@ -153,31 +191,28 @@ def show(iterable:Iterable[Any], indentation:int=0, enum:bool=False, first:int=1
     ('b', '2')
     ('c', '3')
     """
-    if (wasstr:=isinstance(file, str)):
+    if wasstr := isinstance(file, str):
         file = open(file)
     print('\n', file=file) if head else None
     for i, j in enumerate(iterable, first):
         print(
-            (
-                f"{indentation * indentor}{j}",
-                f"{indentation * indentor}{i}\t{j}"
-            )[enum],
+            (f"{indentation * indentor}{j}", f"{indentation * indentor}{i}\t{j}")[enum],
             sep=sep,
-            file=file
+            file=file,
         )
     print('\n', file=file) if tail else None
     if wasstr:
         file.close()
 
 
-def pop(arg:Any=None, file:bool=True, silent:bool=False) -> str:
+def pop(arg: Any = None, file: bool = True, silent: bool = False) -> str:
     """
     Open the folder containing a given module, or object's module, or the content at the path of the given string
     Opens current working directory if no object is given
     Open the module's file if it is given
     If a path is given, it will be opened.
     Return the path which is opened
-    
+
     This will raise an attribute error whenever there is no file to which the object/module is imputed
     """
     module = type(os)
@@ -188,7 +223,7 @@ def pop(arg:Any=None, file:bool=True, silent:bool=False) -> str:
             path = arg.__file__
         else:
             mstr = arg.__module__
-            if (top:=mstr.split('.')[0]) in globals().keys():
+            if (top := mstr.split('.')[0]) in globals().keys():
                 m = eval(mstr)
             else:
                 t = exec(f'import {top}')
@@ -203,7 +238,7 @@ def pop(arg:Any=None, file:bool=True, silent:bool=False) -> str:
     return path
 
 
-def hasDocs(module:type(os), copy:bool=True) -> bool:
+def hasDocs(module: type(os), copy: bool = True) -> bool:
     """
     Returns directory of a given module's documentation... if it can be found by lesser mortals such as I
     Dependencies: os, pyperclip
@@ -211,12 +246,16 @@ def hasDocs(module:type(os), copy:bool=True) -> bool:
     Out: String or Boolean
     """
     base = modir(module, False)
-    directory = os.path.join(base, 'docs') if os.path.exists(os.path.join(base, 'docs')) else os.path.join(base, 'doc')
+    directory = (
+        os.path.join(base, 'docs')
+        if os.path.exists(os.path.join(base, 'docs'))
+        else os.path.join(base, 'doc')
+    )
     d = False if not os.path.exists(directory) else directory
     return d if not copy else pyperclip.copy(d)
 
 
-def getsource(obj:Any, *args, copy:bool=False, **kwargs) -> str:
+def getsource(obj: Any, *args, copy: bool = False, **kwargs) -> str:
     """
     Wrapper on inspect.getsource which uses .show to present the text more readably and pyperclip.copy to copy said text to the clipboard.
     """
@@ -227,6 +266,5 @@ def getsource(obj:Any, *args, copy:bool=False, **kwargs) -> str:
     show(text, *args, **kwargs)
 
 
-
-if __name__=='__main__':
+if __name__ == '__main__':
     pass
