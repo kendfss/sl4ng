@@ -11,7 +11,7 @@ from .iteration import flat, regenerator
 
 
 def sign(number: Real) -> str:
-    return '-+'[number >= 0]
+    return "-+"[number >= 0]
 
 
 def pyramid(length: Integral, shift: Integral = 0) -> Real:
@@ -127,7 +127,10 @@ def _factors(n: Integral) -> Generator:
     """
     Compute the factors of an integer
     """
-    pipe = lambda array: reduce(lambda x, y: x * y, array, 1)
+
+    def pipe(array):
+        return reduce(lambda x, y: x * y, array, 1)
+
     primes = tuple(eratosthenes(n))
     facts = {n, 1} if n != 0 else {}
     for p in primes:
@@ -238,6 +241,8 @@ def isabundant(n: Integral) -> bool:
     """
     Check if an integer is greater than the sum of its factors
     """
+    from .iteration import sigma
+
     return n > sigma(factors(n))
 
 
@@ -245,6 +250,8 @@ def isdeficient(n: Integral) -> bool:
     """
     Check if an integer is smaller than the sum of its factors
     """
+    from .iteration import sigma
+
     return n < sigma(factors(n))
 
 
@@ -269,7 +276,7 @@ def mulper(n: Integral) -> Integral:
         ctr = 0
         while len(str(n)) > 1:
             # digitList = [int(i) for i in "".join(str(n).split('.'))]
-            digitList = map(int, str(i).replace('.', ''))
+            digitList = map(int, str(i).replace(".", ""))
             n = reduce(lambda x, y: x * y, digitList, 1)
             ctr += 1
         return ctr
@@ -286,7 +293,7 @@ def addper(n: Integral) -> Integral:
     else:
         ctr = 0
         while len(str(n)) > 1:
-            digitList = [int(i) for i in "".join(str(n).split('.'))]
+            digitList = [int(i) for i in "".join(str(n).split("."))]
             n = sum(digitList)
             ctr += 1
         return ctr
@@ -312,7 +319,7 @@ def rationability(v: Complex) -> Complex:
     """
     v = 1 / v if isinstance(v, int) else v
     n = ceil(v)
-    p = str(v).replace('.', '')
+    p = str(v).replace(".", "")
     for i, j in enumerate(p):
         n -= int(j) * 10 ** -i
     return n

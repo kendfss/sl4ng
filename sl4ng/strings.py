@@ -1,7 +1,9 @@
 from typing import Iterable, Any, Generator, Callable, Iterator
 from itertools import chain
-import string, random
+import string
+import random
 
+from dataclasses import dataclass
 import pyperclip
 
 from .iteration import regenerator
@@ -10,14 +12,24 @@ from .iteration import regenerator
 from .debug import tipo
 
 
+@dataclass(slots=True, frozen=True)
+class Joiner:
+    sep: str = ""
+    head: str = ""
+    tail: str = ""
+
+    def __call__(self, iterable: Iterable[Any]) -> str:
+        return self.head + self.sep.join(map(str, iterable)) + self.tail
+
+
 def join(
-    iterable: Iterable[Any] = None, sep: str = '', head: str = '', tail: str = ''
-) -> str:
+    iterable: Iterable[Any] = None, sep: str = "", head: str = "", tail: str = ""
+) -> str | Joiner:
     """
     Cast elements of an array to string and concatenate them.
     This will consume a Generator
     Examples:
-        >>> m3ta.show(
+        >>> sl4ng.show(
                 map(
                     join,
                     (range(i) for i in range(1,5))
@@ -29,7 +41,7 @@ def join(
         0123
 
         # Also works as a closure using keyword arguments
-        >>> m3ta.show(
+        >>> sl4ng.show(
             map(
                 join(sep=', ',head='[',tail=']'),
                 (range(i) for i in range(1,5))
@@ -41,17 +53,11 @@ def join(
         [0, 1, 2, 3]
     """
     if not isinstance(iterable, type(None)):
-        return head + sep.join(map(str, iterable)) + tail
-    else:
-
-        def wrapper(iterable: Iterable[Any]):
-            iterable = map(str, iterable)
-            return head + sep.join(iterable) + tail
-
-        return wrapper
+        return Joiner(sep, head, tail)(iterable)
+    return Joiner(sep, head, tail)
 
 
-def ascii(omissions: str = 'w', include: bool = False) -> str:
+def ascii(omissions: str = "w", include: bool = False) -> str:
     """
     Return the ascii character base excluding the given omissions:
         "p" ->  ' ' + punctuation
@@ -84,22 +90,22 @@ def emptyString(line: str) -> bool:
     """
     Determine if a string is empty ('', ' ','\n','\t') or not
     """
-    return any(line == i for i in '* *\n*\t'.split('*'))
+    return any(line == i for i in "* *\n*\t".split("*"))
 
 
 def rewrite(
     string: str,
     charmap: dict = {
-        'A': 'T',
-        'T': 'A',
-        'C': 'G',
-        'G': 'C',
-        'a': 't',
-        't': 'a',
-        'c': 'g',
-        'g': 'c',
+        "A": "T",
+        "T": "A",
+        "C": "G",
+        "G": "C",
+        "a": "t",
+        "t": "a",
+        "c": "g",
+        "g": "c",
     },
-    sep: str = '',
+    sep: str = "",
 ) -> str:
     """
     Given a sequence derived from 'ATCG', this function returns the complimentary base pairs of the given dna sequence
@@ -121,7 +127,7 @@ def monoalphabetic(
     """
     words = message.split(space)
     for index, word in enumerate(words):
-        new = ''
+        new = ""
         for letter in word:
             if decode:
                 substitute = alphabet[(alphabet.index(letter) - shift) % len(alphabet)]
@@ -130,7 +136,7 @@ def monoalphabetic(
             new += substitute
         words[index] = new
     if space == None:
-        space = ' '
+        space = " "
     return space.join(words)
 
 
@@ -191,10 +197,10 @@ def memespace(
         s  o     e  d  g  y
     """
     string = string if keep_spaces else join(string.split())
-    out = ''
+    out = ""
     for i, j in enumerate(string, 1):
         out += j
-        out += ' ' * spaces if i < len(string) else ''
+        out += " " * spaces if i < len(string) else ""
     pyperclip.copy(out) if copy else None
     return out
 
@@ -205,7 +211,7 @@ def memecase(string, copy: bool = False):
     >>> memecase('something about narwhals, bacon, and midnight')
     sOmeTHINg aBOuT nArwHaLS, BAcoN, aND mIDNighT
     """
-    out = ''
+    out = ""
     for i in string:
         out += random.choice([i.upper(), i.lower()])
     pyperclip.copy(out) if copy else None
@@ -224,23 +230,23 @@ def sinusize(string: str, copy: bool = False):
     mat = [[] for i in range(3)]
     for i, j in enumerate(string):
         if not i % 2:
-            mat[0].append(' ')
+            mat[0].append(" ")
             mat[1].append(j)
-            mat[2].append(' ')
+            mat[2].append(" ")
         elif not (i % 4) - 1:
             mat[0].append(j)
-            mat[1].append(' ')
-            mat[2].append(' ')
+            mat[1].append(" ")
+            mat[2].append(" ")
         else:
-            mat[0].append(' ')
-            mat[1].append(' ')
+            mat[0].append(" ")
+            mat[1].append(" ")
             mat[2].append(j)
-    out = join([join(line) for line in mat], '\n')
+    out = join([join(line) for line in mat], "\n")
     pyperclip.copy(out) if copy else None
     return out
 
 
-def clean_url(url, root=True, protocol='http'):
+def clean_url(url, root=True, protocol="http"):
     """
     Remove trailing/leading slashes from a url
     params
@@ -250,10 +256,10 @@ def clean_url(url, root=True, protocol='http'):
             ignored if root=False
             what protocol should be added to the start of a url
     """
-    out = '/'.join(filter(None, url.split('/')))
+    out = "/".join(filter(None, url.split("/")))
     if root:
-        if ':/' in out:
-            out = out.replace(':/', '://')
+        if ":/" in out:
+            out = out.replace(":/", "://")
         else:
-            out = '://'.join((protocol, out))
+            out = "://".join((protocol, out))
     return out

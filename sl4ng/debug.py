@@ -2,7 +2,10 @@
 from typing import Any, Iterable, Generator, Callable
 
 # import sys, winsound, os, time, inspect
-import sys, os, time, inspect
+import sys
+import os
+import time
+import inspect
 
 import pyperclip
 
@@ -13,8 +16,12 @@ class dummy:
 
 winsound = dummy()
 # winsound.__getattr__ = lambda *a, **k: None
-separator = " ".join(70 * '-')
-spaceprint = lambda x: print(x, "\n{}".format(separator))
+separator = " ".join(70 * "-")
+
+
+def spaceprint(x):
+    return print(x, "\n{}".format(separator))
+
 
 mainame = main = '__name__ == "__main__"'
 
@@ -39,7 +46,7 @@ def tipo(inpt, keep_module: bool = True) -> str:
         inpt = str(inpt)
     if keep_module:
         return str(type(inpt)).split("'")[1]
-    return str(type(inpt)).split("'")[1].split('.')[-1]
+    return str(type(inpt)).split("'")[1].split(".")[-1]
 
 
 def beeper(inpt: int):
@@ -81,7 +88,8 @@ def test(func: type(lambda: 1), unsortedlist: tuple) -> float:
     from time import perf_counter as clock
 
     copy = unsortedlist[:]
-    start = clock()  # Set start time. TODO - May convert to using timit module.
+    # Set start time. TODO - May convert to using timit module.
+    start = clock()
     func(copy)  # Run bubble or shuttle sort with copy of unsorted list as argument
     duration = (
         clock() - start
@@ -135,7 +143,7 @@ def tryimport(
     Outputs: module/object
     """
     try:
-        message = f'from {pack} import {name}' if pack else f'import {name}'
+        message = f"from {pack} import {name}" if pack else f"import {name}"
         exec(message)
         return eval(name)
     except ModuleNotFoundError:
@@ -178,11 +186,11 @@ def show(
     indentation: int = 0,
     enum: bool = False,
     first: int = 1,
-    indentor: str = '\t',
+    indentor: str = "\t",
     tail=True,
     head=True,
     file=sys.stdout,
-    sep: str = '',
+    sep: str = "",
 ) -> Generator:
     """
     Print each element of an iterable.
@@ -193,14 +201,14 @@ def show(
     """
     if wasstr := isinstance(file, str):
         file = open(file)
-    print('\n', file=file) if head else None
+    print("\n", file=file) if head else None
     for i, j in enumerate(iterable, first):
         print(
             (f"{indentation * indentor}{j}", f"{indentation * indentor}{i}\t{j}")[enum],
             sep=sep,
             file=file,
         )
-    print('\n', file=file) if tail else None
+    print("\n", file=file) if tail else None
     if wasstr:
         file.close()
 
@@ -215,7 +223,13 @@ def pop(arg: Any = None, file: bool = True, silent: bool = False) -> str:
 
     This will raise an attribute error whenever there is no file to which the object/module is imputed
     """
+    if sys.platform == "darwin":
+        from subprocess import run
+
+        os.startfile = lambda path: run(["open", path])
+
     module = type(os)
+
     if arg:
         if isinstance(arg, str):
             path = arg
@@ -223,10 +237,10 @@ def pop(arg: Any = None, file: bool = True, silent: bool = False) -> str:
             path = arg.__file__
         else:
             mstr = arg.__module__
-            if (top := mstr.split('.')[0]) in globals().keys():
+            if (top := mstr.split(".")[0]) in globals().keys():
                 m = eval(mstr)
             else:
-                t = exec(f'import {top}')
+                t = exec(f"import {top}")
                 m = eval(mstr)
             path = m.__file__
         if not file:
@@ -247,9 +261,9 @@ def hasDocs(module: type(os), copy: bool = True) -> bool:
     """
     base = modir(module, False)
     directory = (
-        os.path.join(base, 'docs')
-        if os.path.exists(os.path.join(base, 'docs'))
-        else os.path.join(base, 'doc')
+        os.path.join(base, "docs")
+        if os.path.exists(os.path.join(base, "docs"))
+        else os.path.join(base, "doc")
     )
     d = False if not os.path.exists(directory) else directory
     return d if not copy else pyperclip.copy(d)
@@ -261,10 +275,10 @@ def getsource(obj: Any, *args, copy: bool = False, **kwargs) -> str:
     """
     text = inspect.getsource(obj).splitlines()
     if copy:
-        text = '\n'.join(text)
+        text = "\n".join(text)
         pyperclip.copy(text)
     show(text, *args, **kwargs)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

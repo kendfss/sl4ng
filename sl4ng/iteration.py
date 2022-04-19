@@ -41,7 +41,7 @@ class __regen:
         """
         if keep_module:
             return str(type(inpt)).split("'")[1]
-        return str(type(inpt)).split("'")[1].split('.')[-1]
+        return str(type(inpt)).split("'")[1].split(".")[-1]
 
     @staticmethod
     def flatten(iterable: Iterable) -> Generator:
@@ -54,7 +54,7 @@ class __regen:
             https://pythonprinciples.com/challenges/Flatten-a-list/
         """
         for i in iterable:
-            if hasattr(i, '__iter__') or hasattr(i, '__next__'):
+            if hasattr(i, "__iter__") or hasattr(i, "__next__"):
                 yield from i
             else:
                 yield i
@@ -76,7 +76,7 @@ class regenerator:
     """
 
     def __init__(self, iterable, *args, **kwargs):
-        if hasattr(iterable, '__call__') and not isinstance(iterable, type(self)):
+        if hasattr(iterable, "__call__") and not isinstance(iterable, type(self)):
             self.active, self._inert = tee(iterable(*args, **kwargs))
         else:
             self.active, self._inert = tee(iterable)
@@ -96,7 +96,7 @@ class regenerator:
                     return e
         else:
             raise
-        raise IndexError(f'{__regen.tipo(self)} contains fewer than {index} elements')
+        raise IndexError(f"{__regen.tipo(self)} contains fewer than {index} elements")
 
     def __call__(self, *indices: Iterable[int]):
         """
@@ -124,10 +124,10 @@ class regenerator:
             return False
 
     def __matmul__(self, other: Iterable):
-        if hasattr(other, '__iter__'):
+        if hasattr(other, "__iter__"):
             return type(self)(product(self, other))
         raise TypeError(
-            f'Matrix-multiplication is not defined between {__regen.tipo(self, True)}'
+            f"Matrix-multiplication is not defined between {__regen.tipo(self, True)}"
             f' and "{__regen.tipo(other, True)}"-type. It must have an "__iter__" or'
             ' "__index__" method.'
         )
@@ -149,21 +149,21 @@ class regenerator:
             >>> [*y]
             [0, 1, 10, 0, 1]
         """
-        other = other if hasattr(other, '__iter__') else [other]
+        other = other if hasattr(other, "__iter__") else [other]
         return type(self)([*self, *other])
 
     def __radd__(self, other: Iterable):
         """
         Swap the order of __add__
         """
-        other = other if hasattr(other, '__iter__') else [other]
+        other = other if hasattr(other, "__iter__") else [other]
         return type(self)(chain(other, self))
 
     def __mul__(self, value: int):
         """
         Replicate the behaviour of multiplying lists by integers
         """
-        if hasattr(value, '__int__'):
+        if hasattr(value, "__int__"):
             return type(self)(chain.from_iterable(self for i in range(int(value))))
         raise TypeError(
             f'Multiplication is not defined for "{__regen.tipo(other, True)}". It must'
@@ -178,10 +178,10 @@ class regenerator:
         """
         value-dimensional Cartesian product of self with itself
         """
-        if hasattr(value, '__int__'):
+        if hasattr(value, "__int__"):
             return type(self)(product(self, repeat=int(value)))
         raise TypeError(
-            f'Exponentiation is not defined for {type(other)}. It must have an'
+            f"Exponentiation is not defined for {type(other)}. It must have an"
             ' "__int__" method.'
         )
 
@@ -227,7 +227,7 @@ class regenerator:
         If "value" is an iterable: its elements will be added to the end of "self"
         Otherwise: it is the same as append
         """
-        other = value if hasattr(value, '__iter__') else [value]
+        other = value if hasattr(value, "__iter__") else [value]
         self._inert = chain(self._inert, *other)
         return self
 
@@ -309,7 +309,7 @@ def flatten(iterable: Iterable) -> Generator:
         https://pythonprinciples.com/challenges/Flatten-a-list/
     """
     for i in iterable:
-        if hasattr(i, '__iter__') or hasattr(i, '__next__'):
+        if hasattr(i, "__iter__") or hasattr(i, "__next__"):
             for j in i:
                 yield j
         else:
@@ -337,11 +337,11 @@ def flat(
             yield from flat(val, dict_keys, strings)
     elif isinstance(iterable, (list, tuple, map, filter)):
         for val in iterable:
-            if hasattr(val, '__iter__'):
+            if hasattr(val, "__iter__"):
                 yield from flat(val, dict_keys, strings)
             else:
                 yield val
-    elif hasattr(iterable, '__iter__'):
+    elif hasattr(iterable, "__iter__"):
         yield from iterable
     else:
         yield iterable
@@ -399,7 +399,7 @@ def deduplicate(unhashable: Iterable) -> dict:
                 trimmed[key] = val
         return trimmed
     else:
-        raise TypeError(f'Protocol for your {tipo(unhashable)} is pending')
+        raise TypeError(f"Protocol for your {tipo(unhashable)} is pending")
 
 
 def band(iterable: Iterable[Real]) -> Real:
@@ -534,14 +534,14 @@ def unzip(iterable: Iterable[Sequence[Any]]) -> List[list]:
 
     """
     consumable = regenerator(iterable)
-    str_escape = lambda string: string.replace("'", "\'").replace("\\", "\\\\")
+    str_escape = lambda string: string.replace("'", "'").replace("\\", "\\\\")
     length = 0
     racks = []
     for i in consumable:
         for j, k in enumerate(i):
             if j > length - 1:
                 exec(f"x{j} = []")
-                racks.append(eval(f'x{j}'))
+                racks.append(eval(f"x{j}"))
                 length += 1
             app_elem = f"""x{j}.append('{(k, str_escape(k))[isinstance(k, str)]}')"""
             eval(app_elem)
@@ -858,7 +858,7 @@ def eq(*args: Iterable[Any]) -> bool:
     Will always return True if the only argument given is not an iterable
     """
     if len(args) == 1:
-        if hasattr(arg := args[0], '__iter__'):
+        if hasattr(arg := args[0], "__iter__"):
             return eq(*arg)
         return True
 
@@ -909,7 +909,7 @@ def imap(argument: Any, *functions: Callable) -> Generator:
     Converse of a map. Yield calls of the functions with the object as an argument
     Generator safe
     """
-    iterates = hasattr(object, '__iter__')
+    iterates = hasattr(object, "__iter__")
     for func in functions:
         yield func((argument, regenerator(argument))[iterates])
 
@@ -920,7 +920,7 @@ def rmap(argument: Any, *functions: Callable) -> Any:
     Generator safe
     """
     functions = iter(functions)
-    iterates = hasattr(object, '__iter__')
+    iterates = hasattr(object, "__iter__")
     result = next(functions)((argument, regenerator(argument))[iterates])
     for func in functions:
         result = func((result, regenerator(result))[iterates])
@@ -973,6 +973,7 @@ def itersplit(iterable: Iterable[Any], *indices: int, cumulative: bool = False):
     indices = (
         regenerator(cumsum(indices, first=False)) if cumulative else sorted(indices)
     )
+
     assert all(isinstance(i, int) for i in indices), "Some indices aren't integers"
 
     boxes = tuple([] for i in indices)

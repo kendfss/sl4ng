@@ -4,7 +4,7 @@ from functools import lru_cache, reduce
 from itertools import tee
 
 from .strings import alphabet
-from .iteration import regenerator
+from .iteration import regenerator, sigma
 
 # from .types import regurge
 
@@ -19,20 +19,22 @@ def shannonEntropy(iterable: Iterable[Any]) -> float:
 
 
 def entropy(
-    iterable: Iterable[Any], base: int = 2, mode: str = 'kbdUS', space: str = None
+    iterable: Iterable[Any], base: int = 2, mode: str = "kbdUS", space: str = None
 ) -> float:
     """
     Computes a modal entropy for a given iterable. Ints and floats will be converted to strings. Comma format ints will raise errors.
     Space determines the character you wish to interpret as space if inpt is a string
     """
     abc = alphabet
-    letters = ''.join(i for i in abc if i.isalpha() or i == ' ')
-    digits = ''.join(i for i in abc if i.isnumeric() or i == '.' or i == '-')
-    prob = lambda x, y: freq(x, y) / len(y)
+    letters = "".join(i for i in abc if i.isalpha() or i == " ")
+    digits = "".join(i for i in abc if i.isnumeric() or i == "." or i == "-")
+
+    def prob(x, y):
+        return freq(x, y) / len(y)
 
     consumable = regenerator(iterable)
 
-    iterates = hasattr(consumable, '__iter__')
+    iterates = hasattr(consumable, "__iter__")
 
     if mode == "kbdUS":
         consumable = (
@@ -42,7 +44,7 @@ def entropy(
         weights = {i: prob(i, chars) for i in set(consumable)}
         return -sigma(val * log(val, base) for val in weights.values())
 
-    elif mode == 'abc':
+    elif mode == "abc":
         consumable = (
             str(consumable) if not iterates else tuple(str(i) for i in consumable)
         )
@@ -50,7 +52,7 @@ def entropy(
         weights = {i: prob(i, chars) for i in set(consumable)}
         return -sigma(val * log(val, base) for val in weights.values())
 
-    elif mode == 'num':
+    elif mode == "num":
         consumable = (
             str(consumable) if not iterates else tuple(str(i) for i in consumable)
         )
@@ -58,7 +60,7 @@ def entropy(
         weights = {i: prob(i, chars) for i in set(consumable)}
         return -sigma(val * log(val, base) for val in weights.values())
 
-    elif mode == 'shan':
+    elif mode == "shan":
         consumable = str(consumable) if not iterates else consumable
         chars = tuple(i for i in consumable)
         weights = {i: prob(i, chars) for i in set(consumable)}
@@ -211,5 +213,5 @@ def samvar(iterable: Iterable[complex]) -> complex:
     return v3
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

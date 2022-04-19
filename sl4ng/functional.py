@@ -30,7 +30,7 @@ def eq(*args: Iterable[Any]) -> bool:
     Will always return True if the only argument given is not an iterable
     """
     if len(args) == 1:
-        if hasattr(arg := args[0], '__iter__'):
+        if hasattr(arg := args[0], "__iter__"):
             return eq(*arg)
         return True
 
@@ -78,7 +78,7 @@ def imap(argument: Any, *functions: Callable) -> generator:
     Converse of a map. Yield calls of the functions with the object as an argument
     Generator safe
     """
-    iterates = hasattr(object, '__iter__')
+    iterates = hasattr(object, "__iter__")
     for func in functions:
         yield func((argument, regurge(argument))[iterates])
 
@@ -89,7 +89,7 @@ def rmap(argument: Any, *functions: Callable) -> Any:
     Generator safe
     """
     functions = iter(functions)
-    iterates = hasattr(object, '__iter__')
+    iterates = hasattr(object, "__iter__")
     result = next(functions)((argument, regurge(argument))[iterates])
     for func in functions:
         result = func((result, regurge(result))[iterates])

@@ -1,4 +1,4 @@
-__all__ = 'generator module function DDict defaultdict'.split()
+__all__ = "generator module function DDict defaultdict".split()
 
 from collections import defaultdict
 from typing import Tuple
@@ -22,15 +22,15 @@ class DDict(defaultdict):
 
     @property
     def __rack(self):
-        pairs = (': '.join(map(repr, pair)) for pair in self.items())
-        r = ',\n   '.join(pairs)
-        return '{\n   ' + r + '\n}'
+        pairs = (": ".join(map(repr, pair)) for pair in self.items())
+        r = ",\n   ".join(pairs)
+        return "{\n   " + r + "\n}"
 
     def __repr__(self):
         return tipo(self) + self.__rack
 
     def __str__(self):
-        return ' '.join(self.__rack.split())
+        return " ".join(self.__rack.split())
 
 
 defaultdict = DDict

@@ -1,7 +1,10 @@
 from __future__ import annotations
-import time, random, string
+import time
+import random
+import string
 
-import pyperclip, psutil
+import pyperclip
+import psutil
 from .iteration import shuffle
 
 
@@ -13,7 +16,7 @@ def agora(string: bool = False) -> str | tuple:
     Out: tuple/string(HH:MM:SS)
     """
     now = tuple(time.localtime())[3:-3]
-    return now if not string else ':'.join(str(i) for i in now)
+    return now if not string else ":".join(str(i) for i in now)
 
 
 def kill(process: str, casefold: bool = True):
@@ -32,19 +35,19 @@ def kill(process: str, casefold: bool = True):
             p.kill()
             for p in psutil.process_iter()
             if p.name().casefold()
-            == process.casefold() + ('.exe', '')[process.endswith('.exe')]
+            == process.casefold() + (".exe", "")[process.endswith(".exe")]
         ]
     else:
         [
             p.kill()
             for p in psutil.process_iter()
-            if p.name() == process + ('.exe', '')[process.endswith('.exe')]
+            if p.name() == process + (".exe", "")[process.endswith(".exe")]
         ]
 
 
 def guid(
     format: tuple = [8, 4, 4, 4, 12],
-    sep: str = '-',
+    sep: str = "-",
     copy: bool = True,
     braces: bool = True,
 ) -> str:
@@ -55,9 +58,9 @@ def guid(
     Out: str
     """
     # chars = ''.join(i for i in shuffle(string.ascii_uppercase + string.digits+string.ascii_lowercase) if i!=sep)
-    chars = ''.join(i for i in shuffle(string.hexdigits) if i != sep)
+    chars = "".join(i for i in shuffle(string.hexdigits) if i != sep)
     ranstr = [random.choice(chars) for i in range(sum(format))]
     [ranstr.insert(i + sum(format[: i + 1]), sep) for i, j in enumerate(format[:-1])]
-    result = "{%s}" % (s := ''.join(ranstr)) if braces else s
+    result = "{%s}" % (s := "".join(ranstr)) if braces else s
     pyperclip.copy(result) if copy else None
     return result
