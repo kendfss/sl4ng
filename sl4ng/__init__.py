@@ -14,7 +14,7 @@ from .magnitudes import *
 HERE, THIS = os.path.split(__file__)
 
 if sys.platform == "darwin":
-    def __startfile(args: str) -> None:
+    def __startfile(arg: str) -> None:
         os.popen(f"open {arg}")
     os.startfile = __startfile
 

@@ -301,7 +301,7 @@ def addper(n: Integral) -> Integral:
 
 def triangular(a: Integral, b: Integral) -> Integral:
     """
-    Returns the triangular number of an interval [a,b]
+    Returns the triangular number of the closed interval [a,b]
     """
     interval = [i for i in range(b) if i > a]
     for num in interval:
